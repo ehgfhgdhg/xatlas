@@ -105,6 +105,8 @@ static bool ProgressCallback(xatlas::ProgressCategory category, int progress, vo
 	return true;
 }
 
+#ifdef EXAMPLE_RASTERIZE
+
 static void RandomColor(uint8_t *color)
 {
 	for (int i = 0; i < 3; i++)
@@ -223,15 +225,17 @@ static void RasterizePolygon(uint8_t *dest, int destWidth, int vertices[][2], co
 }
 #endif
 
+#endif
+
 int main(int argc, char *argv[])
 {
-	if (argc < 2) {
-	    printf("Usage: %s input_file.obj [options]\n", argv[0]);
+	if (argc < 3) {
+	    printf("Usage: %s input_file.obj output_file.obj [options]\n", argv[0]);
 		printf("  Options:\n");
 		printf("    -verbose\n");  
 	    return 1;
 	}
-	s_verbose = (argc >= 3 && STRICMP(argv[2], "-verbose") == 0);
+	s_verbose = (argc >= 4 && STRICMP(argv[3], "-verbose") == 0);
 	// Load object file.
 	printf("Loading '%s'...\n", argv[1]);
 	std::vector<tinyobj::shape_t> shapes;
@@ -314,7 +318,7 @@ int main(int argc, char *argv[])
 	printf("   %u total vertices\n", totalVertices);
 	printf("%.2f seconds (%g ms) elapsed total\n", globalStopwatch.elapsed() / 1000.0, globalStopwatch.elapsed());
 	// Write meshes.
-	const char *modelFilename = "example_output.obj";
+	const char *modelFilename = argv[2]; // "example_output.obj"
 	printf("Writing '%s'...\n", modelFilename);
 	FILE *file;
 	FOPEN(file, modelFilename, "w");
@@ -358,6 +362,7 @@ int main(int argc, char *argv[])
 		}
 		fclose(file);
 	}
+#ifdef EXAMPLE_RASTERIZE
 	if (atlas->width > 0 && atlas->height > 0) {
 		printf("Rasterizing result...\n");
 		// Dump images.
@@ -452,6 +457,7 @@ int main(int argc, char *argv[])
 			stbi_write_tga(filename, atlas->width,atlas->height, 3, &outputChartsImage[i * imageDataSize]);
 		}
 	}
+#endif
 	// Cleanup.
 	xatlas::Destroy(atlas);
 	printf("Done\n");
